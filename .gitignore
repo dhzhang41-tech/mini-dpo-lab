@@ -12,6 +12,9 @@ models/
 *.bin
 *.safetensors
 
+# Training outputs
+results/
+
 # Training logs
 logs/
 runs/

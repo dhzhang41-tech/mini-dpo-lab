@@ -1,0 +1,17 @@
+[
+    {
+      "instruction": "Explain reinforcement learning in simple words.",
+      "input": "",
+      "output": "Reinforcement learning is a machine learning method where an agent learns through rewards and penalties."
+    },
+    {
+      "instruction": "What is supervised fine-tuning?",
+      "input": "",
+      "output": "Supervised fine-tuning is a process where a pretrained language model is trained on labeled instruction-response pairs."
+    },
+    {
+      "instruction": "Explain the difference between SFT and DPO.",
+      "input": "",
+      "output": "SFT learns from demonstrations while DPO learns from preference comparisons between better and worse responses."
+    }
+  ]
