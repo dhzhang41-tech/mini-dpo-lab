@@ -10,19 +10,25 @@ from trl import (
     SFTConfig
 )
 
-from peft import (
-    LoraConfig,
-    get_peft_model
-)
+from peft import LoraConfig
 
 import torch
-
-
-model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+import os
 
 
 # =====================
-# tokenizer
+# Experiment config
+# =====================
+
+model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+
+output_dir = "results/exp002_alpaca_sft/checkpoints"
+
+adapter_dir = "results/exp002_alpaca_sft/adapter"
+
+
+# =====================
+# Tokenizer
 # =====================
 
 tokenizer = AutoTokenizer.from_pretrained(
@@ -31,7 +37,7 @@ tokenizer = AutoTokenizer.from_pretrained(
 
 
 # =====================
-# model
+# Model
 # =====================
 
 model = AutoModelForCausalLM.from_pretrained(
@@ -42,28 +48,30 @@ model = AutoModelForCausalLM.from_pretrained(
 
 
 # =====================
-# LoRA
+# LoRA config
 # =====================
 
 lora_config = LoraConfig(
+
     r=8,
+
     lora_alpha=16,
+
     target_modules=[
         "q_proj",
         "v_proj"
     ],
+
     lora_dropout=0.05,
+
     bias="none",
+
     task_type="CAUSAL_LM"
 )
 
 
-
-# LoRA will be injected by SFTTrainer
-
-
 # =====================
-# dataset
+# Dataset
 # =====================
 
 dataset = load_dataset(
@@ -71,50 +79,79 @@ dataset = load_dataset(
     data_files="data/processed/sft_train.json"
 )
 
+
 dataset = dataset["train"].train_test_split(
     test_size=0.1,
     seed=42
 )
 
+
 print(dataset)
-exit()
 
 
 # =====================
-# training config
+# Training config
 # =====================
 
 training_args = SFTConfig(
-    output_dir="results/sft",
+
+    output_dir=output_dir,
+
 
     num_train_epochs=3,
 
+
     per_device_train_batch_size=1,
+
 
     gradient_accumulation_steps=4,
 
+
     learning_rate=2e-4,
 
-    logging_steps=1,
 
-    save_strategy="epoch",
+    logging_steps=10,
+
+
+    # save frequently
+    save_strategy="steps",
+
+    save_steps=500,
+
+    save_total_limit=3,
+
+
+    # evaluation
+    eval_strategy="epoch",
+
+
+    # memory optimization
+    gradient_checkpointing=True,
+
 
     fp16=True,
+
+
+    max_seq_length=512,
+
 
     dataset_text_field="text"
 )
 
 
 # =====================
-# trainer
+# Trainer
 # =====================
 
 trainer = SFTTrainer(
+
     model=model,
 
     args=training_args,
 
     train_dataset=dataset["train"],
+
+    eval_dataset=dataset["test"],
 
     processing_class=tokenizer,
 
@@ -122,20 +159,53 @@ trainer = SFTTrainer(
 )
 
 
-trainer.train()
+# =====================
+# Training
+# =====================
+
+checkpoint_exists = False
+
+
+if os.path.exists(output_dir):
+
+    checkpoints = [
+        x for x in os.listdir(output_dir)
+        if x.startswith("checkpoint")
+    ]
+
+    if len(checkpoints) > 0:
+        checkpoint_exists = True
+
+
+
+if checkpoint_exists:
+
+    print("Resume from checkpoint")
+
+    trainer.train(
+        resume_from_checkpoint=True
+    )
+
+else:
+
+    print("Start new training")
+
+    trainer.train()
+
 
 
 # =====================
-# save
+# Save adapter
 # =====================
 
 trainer.model.save_pretrained(
-    "results/sft_adapter"
+    adapter_dir
 )
+
 
 tokenizer.save_pretrained(
-    "results/sft_adapter"
+    adapter_dir
 )
 
 
-print("SFT training finished!")
+print("EXP002 Alpaca SFT finished!")
