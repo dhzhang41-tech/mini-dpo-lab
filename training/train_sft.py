@@ -68,8 +68,16 @@ lora_config = LoraConfig(
 
 dataset = load_dataset(
     "json",
-    data_files="data/sft_chat.json"
+    data_files="data/processed/sft_train.json"
 )
+
+dataset = dataset["train"].train_test_split(
+    test_size=0.1,
+    seed=42
+)
+
+print(dataset)
+exit()
 
 
 # =====================
