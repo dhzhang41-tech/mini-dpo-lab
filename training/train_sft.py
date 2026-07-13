@@ -13,7 +13,6 @@ from trl import (
 from peft import LoraConfig
 
 import torch
-import os
 
 
 # =====================
@@ -22,9 +21,9 @@ import os
 
 model_name = "Qwen/Qwen2.5-1.5B-Instruct"
 
-output_dir = "results/exp002_alpaca_sft/checkpoints"
+output_dir = "results/exp002_alpaca_sft_v3/checkpoints"
 
-adapter_dir = "results/exp002_alpaca_sft/adapter"
+adapter_dir = "results/exp002_alpaca_sft_v3/adapter"
 
 
 # =====================
@@ -45,7 +44,10 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype=torch.float16,
     device_map="auto"
 )
+
+# disable cache during training
 model.config.use_cache = False
+
 
 # =====================
 # LoRA config
@@ -95,19 +97,31 @@ print(dataset)
 
 training_args = SFTConfig(
 
-    output_dir="results/exp002_alpaca_sft/checkpoints",
+    output_dir=output_dir,
 
+
+    # full training epochs
     num_train_epochs=3,
+
+
+    # TEST ONLY
+    # remove this line after validation
+ 
+
 
     per_device_train_batch_size=1,
 
+
     gradient_accumulation_steps=4,
 
+
     learning_rate=2e-4,
+
 
     logging_steps=10,
 
 
+    # checkpoint
     save_strategy="steps",
 
     save_steps=500,
@@ -115,15 +129,15 @@ training_args = SFTConfig(
     save_total_limit=3,
 
 
+    # evaluation
     eval_strategy="epoch",
 
 
-    gradient_checkpointing=True,
-
-
+    # fp16
     fp16=True,
 
 
+    # avoid long sequence OOM
     max_seq_length=512,
 
 
@@ -152,43 +166,23 @@ trainer = SFTTrainer(
 
 
 # =====================
-# Training
+# Train
 # =====================
 
-checkpoint_exists = False
+print("Start new EXP002-v3 training")
 
-
-if os.path.exists(output_dir):
-
-    checkpoints = [
-        x for x in os.listdir(output_dir)
-        if x.startswith("checkpoint")
-    ]
-
-    if len(checkpoints) > 0:
-        checkpoint_exists = True
-
-
-
-if checkpoint_exists:
-
-    print("Resume from checkpoint")
-
-    trainer.train(
-        resume_from_checkpoint=True
-    )
-
-else:
-
-    print("Start new training")
-
-    trainer.train()
-
+trainer.train()
 
 
 # =====================
-# Save adapter
+# Save LoRA adapter
 # =====================
+
+import gc
+
+gc.collect()
+
+torch.cuda.empty_cache()
 
 trainer.model.save_pretrained(
     adapter_dir
@@ -200,4 +194,4 @@ tokenizer.save_pretrained(
 )
 
 
-print("EXP002 Alpaca SFT finished!")
+print("EXP002-v3 Alpaca SFT finished!")
