@@ -45,7 +45,7 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype=torch.float16,
     device_map="auto"
 )
-
+model.config.use_cache = False
 
 # =====================
 # LoRA config
@@ -95,25 +95,19 @@ print(dataset)
 
 training_args = SFTConfig(
 
-    output_dir=output_dir,
-
+    output_dir="results/exp002_alpaca_sft/checkpoints",
 
     num_train_epochs=3,
 
-
     per_device_train_batch_size=1,
-
 
     gradient_accumulation_steps=4,
 
-
     learning_rate=2e-4,
-
 
     logging_steps=10,
 
 
-    # save frequently
     save_strategy="steps",
 
     save_steps=500,
@@ -121,11 +115,9 @@ training_args = SFTConfig(
     save_total_limit=3,
 
 
-    # evaluation
     eval_strategy="epoch",
 
 
-    # memory optimization
     gradient_checkpointing=True,
 
 
