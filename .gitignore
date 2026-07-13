@@ -1,27 +1,69 @@
-# Python cache
-__pycache__/
-*.pyc
+# =====================
+# Python
+# =====================
 
-# Virtual environments
+__pycache__/
+*.py[cod]
+*.pyo
+
+
+# =====================
+# Environment
+# =====================
+
 .venv/
 .env
 
-# Model checkpoints
+
+# =====================
+# Data
+# =====================
+
+# Raw datasets downloaded externally
+data/raw/
+
+
+# =====================
+# Model files
+# =====================
+
+# Model weights
+*.safetensors
+*.bin
+
+# Checkpoints
 checkpoints/
 models/
-*.bin
-*.safetensors
 
-# Training outputs
+
+# =====================
+# Experiment outputs
+# =====================
+
+# Training outputs, adapters, checkpoints
 results/
 
-# Training logs
+# Logs
 logs/
 runs/
 
-# Experiment outputs
+# Experiment tracking
 wandb/
 
-# OS files
+
+# =====================
+# Notebook
+# =====================
+
+.ipynb_checkpoints/
+
+
+# =====================
+# OS / IDE
+# =====================
+
 .DS_Store
 Thumbs.db
+
+.vscode/
+.idea/
