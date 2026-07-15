@@ -1,67 +1,86 @@
 **mini-dpo-lab**
 
-**Overview**
+A minimal but complete implementation of an LLM alignment pipeline, including:  
+  
+- Supervised Fine-Tuning (SFT)  
+- LoRA parameter-efficient fine-tuning  
+- Direct Preference Optimization (DPO)  
+- Model evaluation and behavior analysis  
+  
+The goal of this project is to understand and reproduce modern LLM post-training workflows.
 
-A minimal but complete implementation of an LLM alignment pipeline, including Supervised Fine-Tuning (SFT), LoRA parameter-efficient fine-tuning, Direct Preference Optimization (DPO), and model evaluation.  
+**Results Summary**
 
-The goal is to understand and reproduce modern LLM post-training workflows.  
+Stage | Training Objective | Observed Improvement  
+Base Model | Pre-training | General language modeling capability  
+SFT | Instruction Supervision | Better instruction following and structured responses  
+DPO | Human Preference Optimization | Better alignment, helpfulness, and response consistency
 
-## Results Summary
+**Pipeline**
 
-| Stage | Training Objective | Observed Improvement |
-
-|:---:|:---|:---|
-
-| Base Model | Pre-training | General language modeling capability |
-
-| SFT | Instruction Supervision | Better instruction following and structured responses |
-
-| DPO | Human Preference Optimization | Better alignment, helpfulness, and response consistency |
-
-Pipeline:  
-Base LLM (Qwen2.5-1.5B-Instruct) → SFT → DPO → Preference-aligned Model
+Qwen2.5-1.5B-Instruct  
+  
+        ↓  
+  
+Supervised Fine-Tuning (SFT)  
+  
+        ↓  
+  
+Instruction-following Model  
+  
+        ↓  
+  
+Direct Preference Optimization (DPO)  
+  
+        ↓  
+  
+Preference-aligned Model
 
 **Project Structure**
 
-data/  
-
-- prepare_sft_[data.py](http://data.py)  
-- prepare_dpo_[data.py](http://data.py)
-
-training/  
-
-- train_[sft.py](http://sft.py)  
-- merge_[sft.py](http://sft.py)  
-- train_[dpo.py](http://dpo.py)
-
-evaluation/  
-
-- compare_[sft.py](http://sft.py)  
-- compare_[dpo.py](http://dpo.py)  
-- prompts.json
-
-docs/  
-
-- EXP003_DPO_[result.md](http://result.md)
+mini-dpo-lab  
+  
+├── data  
+│   ├── prepare_sft_[data.py](http://data.py)  
+│   └── prepare_dpo_[data.py](http://data.py)  
+│  
+├── training  
+│   ├── train_[sft.py](http://sft.py)  
+│   ├── merge_[sft.py](http://sft.py)  
+│   └── train_[dpo.py](http://dpo.py)  
+│  
+├── evaluation  
+│   ├── compare_[sft.py](http://sft.py)  
+│   ├── compare_[dpo.py](http://dpo.py)  
+│   ├── prompts.json  
+│   └── outputs  
+│  
+├── docs  
+│   └── EXP003_DPO_[result.md](http://result.md)  
+│  
+└── [README.md](http://README.md)
 
 **Models**
 
-Base model: Qwen2.5-1.5B-Instruct  
-
-Training strategy:  
-
-- Freeze original parameters  
+Base Model:  
+Qwen/Qwen2.5-1.5B-Instruct  
+  
+Training Strategy:  
+- Freeze original model parameters  
 - Train LoRA adapters  
-- Reduce GPU memory requirements
+- Reduce GPU memory requirements  
+  
+Hardware:  
+RTX 5070 Laptop GPU (8GB VRAM)
 
-Hardware: RTX 5070 Laptop GPU (8GB VRAM)
+**Experiments**
 
 **EXP001: Toy SFT Pipeline**
 
-Objective: Validate the supervised fine-tuning workflow.  
-
+Objective:  
+Validate the supervised fine-tuning workflow.  
+  
 Implemented:  
-
 - Dataset formatting  
 - LoRA training  
 - Adapter saving  
@@ -69,32 +88,35 @@ Implemented:
 
 **EXP002: Alpaca-style SFT**
 
-Objective: Improve instruction-following ability through supervised fine-tuning.  
-
-Configuration:  
-
-- Epochs: 3  
-- Batch size: 1  
-- Gradient accumulation: 4  
-- Learning rate: 2e-4  
-- Max sequence length: 512
-
+Objective:  
+Improve instruction-following ability through supervised fine-tuning.  
+  
+Training:  
+- Supervised Fine-Tuning  
+- LoRA fine-tuning  
+  
 Observation:  
-SFT mainly improved instruction following, response structure, and task-oriented generation.
+SFT mainly improves instruction following, response structure, and task-oriented generation.  
+  
+Limitations:  
+- No significant factual knowledge improvement  
+- Limited reasoning improvement
 
 **EXP003: Direct Preference Optimization (DPO)**
 
-Objective: Apply preference optimization on top of the SFT model.  
-
-Dataset: UltraFeedback preference dataset.  
-
-Format:  
+Objective:  
+Apply preference optimization on top of the SFT model.  
+  
+Dataset:  
+UltraFeedback preference dataset.  
+  
+Training format:  
 {prompt, chosen, rejected}  
-
-Training samples: 1000 preference pairs.  
-
+  
+Training samples:  
+1000 preference pairs  
+  
 Configuration:  
-
 - Epochs: 1  
 - Batch size: 1  
 - Gradient accumulation: 4  
@@ -102,69 +124,28 @@ Configuration:
 - Beta: 0.1  
 - Max sequence length: 512
 
-**DPO Training Results**
-
-Training completed successfully.  
-
-Observed:  
-
-- DPO loss decreased  
-- Chosen response reward increased  
-- Rejected response reward decreased  
-- Reward margin improved
-
-Final metrics:  
-
-- Train loss: 0.6108  
-- Reward margin: ~0.52  
-- Reward accuracy: ~0.82
-
 **Evaluation**
 
 Compared models:  
-
-1. Base Qwen model
-2. SFT model
-3. DPO model
-
+1. Base Qwen model  
+2. SFT model  
+3. DPO model  
+  
 Categories:  
-
 - Instruction following  
 - Format control  
 - Role playing  
 - Reasoning  
-- Coding
-
-Conclusion:  
-SFT improves instruction following and formatting. DPO improves alignment-related behaviors such as helpfulness and response consistency.
-
-**Key Findings**
-
-SFT improves:  
-
-- Instruction following  
-- Response formatting  
-- Task understanding
-
-DPO improves:  
-
-- Preference alignment  
-- Helpfulness  
-- Response consistency
-
-However, general SFT and DPO do not automatically improve reasoning or coding abilities without specialized data.
-
-**Future Work**
-
-Possible extensions:  
-
-1. Scale DPO dataset size.
-2. Apply domain-specific alignment.
-3. Combine DPO with LLM agents.
+- Coding  
+  
+Main findings:  
+- SFT improves instruction following and response formatting.  
+- DPO improves preference alignment, helpfulness, and response consistency.  
+- General SFT and DPO do not automatically improve reasoning or coding ability.
 
 **References**
 
-InstructGPT  
-Direct Preference Optimization: Your Language Model is Secretly a Reward Model  
-Qwen2.5 Technical Report  
-UltraFeedback Dataset
+- InstructGPT: Training language models to follow instructions with human feedback  
+- Direct Preference Optimization: Your Language Model is Secretly a Reward Model  
+- Qwen2.5 Technical Report  
+- UltraFeedback Dataset
