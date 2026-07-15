@@ -1,0 +1,27 @@
+[
+    {
+        "id": 1,
+        "category": "instruction_following",
+        "prompt": "Explain what machine learning is in three bullet points."
+    },
+    {
+        "id": 2,
+        "category": "format_control",
+        "prompt": "Summarize the benefits of exercise. Return the answer as a JSON object with keys: benefits and examples."
+    },
+    {
+        "id": 3,
+        "category": "role_play",
+        "prompt": "You are a fitness coach. Create a beginner workout plan for someone who wants to build muscle."
+    },
+    {
+        "id": 4,
+        "category": "reasoning",
+        "prompt": "A farmer has 17 sheep. All but 9 run away. How many sheep remain?"
+    },
+    {
+        "id": 5,
+        "category": "coding",
+        "prompt": "Write a Python function to check whether a number is prime."
+    }
+]

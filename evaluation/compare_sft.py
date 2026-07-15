@@ -1,18 +1,49 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from peft import PeftModel
+import json
 import torch
 
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM
+)
 
-model_name = "Qwen/Qwen2.5-1.5B-Instruct"
-
-adapter_path = "results/sft_adapter"
-
-
-prompt = "Explain the difference between SFT and DPO."
+from peft import PeftModel
 
 
 # =================
-# tokenizer
+# Config
+# =================
+
+model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+
+adapter_path = (
+    "results/exp002_alpaca_sft_v3/adapter"
+)
+
+prompt_file = (
+    "evaluation/prompts.json"
+)
+
+output_file = (
+    "evaluation/outputs/compare_results.json"
+)
+
+
+# =================
+# Load prompts
+# =================
+
+with open(
+    prompt_file,
+    "r",
+    encoding="utf-8"
+) as f:
+
+    prompts = json.load(f)
+
+
+
+# =================
+# Tokenizer
 # =================
 
 tokenizer = AutoTokenizer.from_pretrained(
@@ -20,9 +51,12 @@ tokenizer = AutoTokenizer.from_pretrained(
 )
 
 
+
 # =================
 # Base model
 # =================
+
+print("Loading base model...")
 
 base_model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -31,9 +65,12 @@ base_model = AutoModelForCausalLM.from_pretrained(
 )
 
 
+
 # =================
 # SFT model
 # =================
+
+print("Loading SFT adapter...")
 
 sft_model = PeftModel.from_pretrained(
     base_model,
@@ -41,7 +78,19 @@ sft_model = PeftModel.from_pretrained(
 )
 
 
-def generate(model):
+sft_model.eval()
+base_model.eval()
+
+
+print("Models loaded successfully")
+
+
+
+# =================
+# Generate
+# =================
+
+def generate(model, prompt):
 
     inputs = tokenizer(
         prompt,
@@ -49,10 +98,14 @@ def generate(model):
     ).to(model.device)
 
 
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=200
-    )
+    with torch.no_grad():
+
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=200,
+            temperature=0.7,
+            do_sample=True
+        )
 
 
     return tokenizer.decode(
@@ -61,9 +114,70 @@ def generate(model):
     )
 
 
-print("\n===== Base Model =====")
-print(generate(base_model))
+
+# =================
+# Evaluation
+# =================
+
+results = []
 
 
-print("\n===== SFT Model =====")
-print(generate(sft_model))
+for item in prompts:
+
+    print(
+        f"\nTesting {item['category']}"
+    )
+
+
+    prompt = item["prompt"]
+
+
+    base_output = generate(
+        base_model,
+        prompt
+    )
+
+
+    sft_output = generate(
+        sft_model,
+        prompt
+    )
+
+
+    results.append(
+        {
+            "id": item["id"],
+            "category": item["category"],
+            "prompt": prompt,
+            "base_output": base_output,
+            "sft_output": sft_output
+        }
+    )
+
+
+
+# =================
+# Save
+# =================
+
+with open(
+    output_file,
+    "w",
+    encoding="utf-8"
+) as f:
+
+    json.dump(
+        results,
+        f,
+        indent=4,
+        ensure_ascii=False
+    )
+
+
+print(
+    "\nEvaluation finished!"
+)
+
+print(
+    f"Saved to {output_file}"
+)
