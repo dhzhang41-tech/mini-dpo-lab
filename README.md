@@ -1,52 +1,145 @@
-# Mini-DPO Lab
+**mini-dpo-lab**
 
-A lightweight framework for studying LLM alignment with Supervised Fine-Tuning (SFT) and Direct Preference Optimization (DPO).
+**Overview**
 
-## Motivation
+A minimal but complete implementation of an LLM alignment pipeline, including Supervised Fine-Tuning (SFT), LoRA parameter-efficient fine-tuning, Direct Preference Optimization (DPO), and model evaluation.  
+  
+The goal is to understand and reproduce modern LLM post-training workflows.  
+  
+Pipeline:  
+Base LLM (Qwen2.5-1.5B-Instruct) → SFT → DPO → Preference-aligned Model
 
-Large Language Models (LLMs) can generate fluent responses but may not always follow human instructions or preferences.
+**Project Structure**
 
-This project aims to build a small-scale LLM alignment pipeline to study how post-training methods improve model behavior.
+data/  
+- prepare_sft_[data.py](http://data.py)  
+- prepare_dpo_[data.py](http://data.py)  
+  
+training/  
+- train_[sft.py](http://sft.py)  
+- merge_[sft.py](http://sft.py)  
+- train_[dpo.py](http://dpo.py)  
+  
+evaluation/  
+- compare_[sft.py](http://sft.py)  
+- compare_[dpo.py](http://dpo.py)  
+- prompts.json  
+  
+docs/  
+- EXP003_DPO_[result.md](http://result.md)
 
-## Research Questions
+**Models**
 
-1. How does Supervised Fine-Tuning improve instruction following ability?
-2. Does DPO further improve human preference alignment compared with SFT?
-3. How do DPO hyperparameters influence model behavior?
+Base model: Qwen2.5-1.5B-Instruct  
+  
+Training strategy:  
+- Freeze original parameters  
+- Train LoRA adapters  
+- Reduce GPU memory requirements  
+  
+Hardware: RTX 5070 Laptop GPU (8GB VRAM)
 
+**EXP001: Toy SFT Pipeline**
 
+Objective: Validate the supervised fine-tuning workflow.  
+  
+Implemented:  
+- Dataset formatting  
+- LoRA training  
+- Adapter saving  
+- Basic inference testing
 
-## Pipeline
+**EXP002: Alpaca-style SFT**
 
-Base Model
+Objective: Improve instruction-following ability through supervised fine-tuning.  
+  
+Configuration:  
+- Epochs: 3  
+- Batch size: 1  
+- Gradient accumulation: 4  
+- Learning rate: 2e-4  
+- Max sequence length: 512  
+  
+Observation:  
+SFT mainly improved instruction following, response structure, and task-oriented generation.
 
-↓
+**EXP003: Direct Preference Optimization (DPO)**
 
-Supervised Fine-Tuning (SFT)
+Objective: Apply preference optimization on top of the SFT model.  
+  
+Dataset: UltraFeedback preference dataset.  
+  
+Format:  
+{prompt, chosen, rejected}  
+  
+Training samples: 1000 preference pairs.  
+  
+Configuration:  
+- Epochs: 1  
+- Batch size: 1  
+- Gradient accumulation: 4  
+- Learning rate: 5e-5  
+- Beta: 0.1  
+- Max sequence length: 512
 
-↓
+**DPO Training Results**
 
-Direct Preference Optimization (DPO)
+Training completed successfully.  
+  
+Observed:  
+- DPO loss decreased  
+- Chosen response reward increased  
+- Rejected response reward decreased  
+- Reward margin improved  
+  
+Final metrics:  
+- Train loss: 0.6108  
+- Reward margin: ~0.52  
+- Reward accuracy: ~0.82
 
-↓
+**Evaluation**
 
-Evaluation & Visualization
+Compared models:  
+1. Base Qwen model  
+2. SFT model  
+3. DPO model  
+  
+Categories:  
+- Instruction following  
+- Format control  
+- Role playing  
+- Reasoning  
+- Coding  
+  
+Conclusion:  
+SFT improves instruction following and formatting. DPO improves alignment-related behaviors such as helpfulness and response consistency.
 
-## Tech Stack
+**Key Findings**
 
-- PyTorch
-- HuggingFace Transformers
-- HuggingFace TRL
-- PEFT (LoRA)
-- Qwen2.5 Models
+SFT improves:  
+- Instruction following  
+- Response formatting  
+- Task understanding  
+  
+DPO improves:  
+- Preference alignment  
+- Helpfulness  
+- Response consistency  
+  
+However, general SFT and DPO do not automatically improve reasoning or coding abilities without specialized data.
 
+**Future Work**
 
+Possible extensions:  
+  
+1. Scale DPO dataset size.  
+2. Apply domain-specific alignment.  
+3. Combine DPO with LLM agents.
 
-## Experiments
+**References**
 
-Planned experiments:
-
-- Base model vs SFT model
-- SFT model vs DPO model
-- DPO hyperparameter analysis
+InstructGPT  
+Direct Preference Optimization: Your Language Model is Secretly a Reward Model  
+Qwen2.5 Technical Report  
+UltraFeedback Dataset
 
