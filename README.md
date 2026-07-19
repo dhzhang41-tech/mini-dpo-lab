@@ -1,8 +1,14 @@
-# mini-dpo-lab
+# **mini-dpo-lab**
+
+
 
 A minimal but complete implementation of an LLM alignment pipeline.
 
+
+
 This project reproduces modern LLM post-training workflows under limited computational resources, including:
+
+
 
 - Supervised Fine-Tuning (SFT)
 
@@ -10,63 +16,97 @@ This project reproduces modern LLM post-training workflows under limited computa
 
 - Direct Preference Optimization (DPO)
 
-- Reasoning Preference Optimization (Reasoning-DPO)
+- Reasoning-DPO
 
 - Model evaluation and error analysis
 
+
+
 The goal of this project is to understand, reproduce, and analyze modern LLM post-training techniques.
+
+
 
 ---
 
-## Pipeline
 
-![Pipeline](docs/pipeline.png)
+
+**Pipeline**
+
+
 
 The overall workflow:
 
+
+
+```mermaid
+
+flowchart TD
+
+
+
+A[Qwen2.5-1.5B-Instruct]
+
+
+
+B[LoRA Supervised Fine-Tuning]
+
+
+
+C[Instruction-following Model]
+
+
+
+D[Preference Dataset Construction]
+
+
+
+E[Direct Preference Optimization]
+
+
+
+F[Reasoning Preference Dataset]
+
+
+
+G[Reasoning-DPO]
+
+
+
+H[GSM8K Evaluation]
+
+
+
+I[Error Analysis]
+
+
+
+A --> B
+
+B --> C
+
+C --> D
+
+D --> E
+
+F --> G
+
+E --> G
+
+G --> H
+
+H --> I
+
 ```
 
-Qwen2.5-1.5B-Instruct
 
-        ↓
-
-LoRA Supervised Fine-Tuning (SFT)
-
-        ↓
-
-Instruction-following Model
-
-        ↓
-
-Preference Dataset Construction
-
-(prompt / chosen / rejected)
-
-        ↓
-
-Direct Preference Optimization (DPO)
-
-        ↓
-
-Reasoning Preference Dataset
-
-(correct reasoning / incorrect reasoning)
-
-        ↓
-
-Reasoning-DPO
-
-        ↓
-
-GSM8K Evaluation
-
-(Accuracy + Error Analysis)
-
-```
 
 ---
 
-## Results Summary
+
+
+**Results Summary**
+
+
 
 | Stage | Objective | Observation |
 
@@ -80,13 +120,21 @@ GSM8K Evaluation
 
 | Reasoning-DPO | Reasoning preference optimization | Small improvement on mathematical reasoning |
 
+
+
 ---
 
-## Project Structure
+
+
+**Project Structure**
+
+
 
 ```
 
 mini-dpo-lab
+
+
 
 ├── data
 
@@ -136,9 +184,7 @@ mini-dpo-lab
 
 │   ├── EXP003_DPO_[result.md](http://result.md)
 
-│   ├── EXP004_reasoning_dataset_[analysis.md](http://analysis.md)
-
-│   └── pipeline.png
+│   └── EXP004_reasoning_dataset_[analysis.md](http://analysis.md)
 
 │
 
@@ -146,15 +192,27 @@ mini-dpo-lab
 
 ```
 
+
+
 ---
 
-# Model
 
-## Base Model
+
+**Model**
+
+
+
+**Base Model**
+
+
 
 Qwen/Qwen2.5-1.5B-Instruct
 
-## Training Strategy
+
+
+**Training Strategy**
+
+
 
 - Freeze original model parameters
 
@@ -162,21 +220,39 @@ Qwen/Qwen2.5-1.5B-Instruct
 
 - Reduce GPU memory requirements
 
-## Hardware
+
+
+**Hardware**
+
+
 
 RTX 5070 Laptop GPU (16GB VRAM)
 
+
+
 ---
 
-# Experiments
 
-## EXP001: Toy SFT Pipeline
+
+**Experiments**
+
+
+
+**EXP001: Toy SFT Pipeline**
+
+
 
 ### Objective
 
+
+
 Validate the complete supervised fine-tuning workflow.
 
+
+
 ### Implemented
+
+
 
 - Dataset formatting
 
@@ -186,23 +262,41 @@ Validate the complete supervised fine-tuning workflow.
 
 - Basic inference testing
 
+
+
 ---
 
-## EXP002: Alpaca-style SFT
+
+
+**EXP002: Alpaca-style SFT**
+
+
 
 ### Objective
 
+
+
 Improve instruction-following ability through supervised fine-tuning.
 
+
+
 ### Training
+
+
 
 - Supervised Fine-Tuning
 
 - LoRA parameter-efficient training
 
+
+
 ### Observation
 
+
+
 SFT improves:
+
+
 
 - Instruction following
 
@@ -210,23 +304,43 @@ SFT improves:
 
 - Task-oriented generation
 
+
+
 ### Limitation
+
+
 
 - Limited improvement in reasoning ability
 
+
+
 ---
 
-# EXP003: Direct Preference Optimization (DPO)
 
-## Objective
+
+**EXP003: Direct Preference Optimization (DPO)**
+
+
+
+### Objective
+
+
 
 Apply preference optimization on top of the SFT model.
 
-## Dataset
+
+
+### Dataset
+
+
 
 UltraFeedback preference dataset
 
-## Training Format
+
+
+### Training Format
+
+
 
 ```json
 
@@ -242,7 +356,11 @@ UltraFeedback preference dataset
 
 ```
 
-## Configuration
+
+
+### Configuration
+
+
 
 - Epochs: 1
 
@@ -256,9 +374,15 @@ UltraFeedback preference dataset
 
 - Max sequence length: 512
 
-## Evaluation
+
+
+### Evaluation
+
+
 
 Compared models:
+
+
 
 - Base Qwen model
 
@@ -266,7 +390,11 @@ Compared models:
 
 - DPO model
 
-## Findings
+
+
+### Findings
+
+
 
 - SFT improves instruction following and response formatting.
 
@@ -274,21 +402,41 @@ Compared models:
 
 - Alignment optimization does not automatically improve reasoning ability.
 
+
+
 ---
 
-# EXP004: Reasoning-DPO
 
-## Objective
+
+**EXP004: Reasoning-DPO**
+
+
+
+**Objective**
+
+
 
 Investigate whether reasoning-aware preference optimization can improve mathematical reasoning ability.
 
+
+
 Different from standard DPO, this experiment uses reasoning preference pairs:
+
+
 
 - chosen: correct reasoning trajectory
 
 - rejected: plausible but incorrect reasoning trajectory
 
-## Dataset
+
+
+---
+
+
+
+**Dataset**
+
+
 
 - GSM8K
 
@@ -296,39 +444,73 @@ Different from standard DPO, this experiment uses reasoning preference pairs:
 
 - 404 validated samples
 
-## Pipeline
+
+
+Pipeline:
+
+
 
 ```
 
 GSM8K
 
+
+
 ↓
+
+
 
 Reasoning generation
 
+
+
 ↓
+
+
 
 Negative reasoning construction
 
+
+
 ↓
+
+
 
 Validation
 
+
+
 ↓
+
+
 
 Reasoning-DPO Training
 
 ```
 
-## Evaluation
+
+
+---
+
+
+
+**Evaluation**
+
+
 
 Benchmark:
+
+
 
 - GSM8K test set
 
 - 100 samples
 
-## Results
+
+
+**Results**
+
+
 
 | Model | Accuracy |
 
@@ -342,19 +524,33 @@ Benchmark:
 
 | Reasoning-DPO | 33% |
 
-## Analysis
+
+
+---
+
+
+
+**Analysis**
+
+
 
 Reasoning-DPO achieves a small improvement over standard DPO.
 
-Error analysis shows:
 
-### Improvements
+
+Improvements:
+
+
 
 - More complete reasoning trajectories
 
 - Better step-by-step problem solving
 
-### Failure Cases
+
+
+Failure Cases:
+
+
 
 - Irrelevant continuation
 
@@ -362,7 +558,15 @@ Error analysis shows:
 
 - Noise from synthetic preference data
 
-## Future Improvements
+
+
+---
+
+
+
+**Future Improvements**
+
+
 
 - Higher quality reasoning preference data
 
@@ -372,9 +576,15 @@ Error analysis shows:
 
 - Comparison with GRPO and RL-based reasoning optimization
 
+
+
 ---
 
-# References
+
+
+**References**
+
+
 
 - InstructGPT: Training language models to follow instructions with human feedback
 
@@ -385,4 +595,3 @@ Error analysis shows:
 - UltraFeedback Dataset
 
 - GSM8K Dataset
-
