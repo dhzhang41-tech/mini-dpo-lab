@@ -1,10 +1,8 @@
 # mini-dpo-lab
 
+A minimal but complete implementation of an LLM alignment pipeline.
 
-
-A minimal but complete implementation of an LLM alignment pipeline, including:
-
-
+This project reproduces modern LLM post-training workflows under limited computational resources, including:
 
 - Supervised Fine-Tuning (SFT)
 
@@ -12,79 +10,83 @@ A minimal but complete implementation of an LLM alignment pipeline, including:
 
 - Direct Preference Optimization (DPO)
 
-- Reasoning-aware Preference Optimization
+- Reasoning Preference Optimization (Reasoning-DPO)
 
-- Model evaluation and behavior analysis
+- Model evaluation and error analysis
 
+The goal of this project is to understand, reproduce, and analyze modern LLM post-training techniques.
 
+---
 
-The goal of this project is to understand and reproduce modern LLM post-training workflows under limited computational resources.
+## Pipeline
 
+![Pipeline](docs/pipeline.png)
 
+The overall workflow:
 
-
-
-Overview
-
-
-
-Modern LLM alignment usually consists of multiple post-training stages:
-
-
+```
 
 Qwen2.5-1.5B-Instruct
 
+        ↓
 
+LoRA Supervised Fine-Tuning (SFT)
 
-↓
-
-
-
-Supervised Fine-Tuning (SFT)
-
-
-
-↓
-
-
+        ↓
 
 Instruction-following Model
 
+        ↓
 
+Preference Dataset Construction
 
-↓
+(prompt / chosen / rejected)
 
-
+        ↓
 
 Direct Preference Optimization (DPO)
 
+        ↓
 
+Reasoning Preference Dataset
 
-↓
+(correct reasoning / incorrect reasoning)
 
+        ↓
 
+Reasoning-DPO
 
-Preference-aligned Model
+        ↓
 
+GSM8K Evaluation
 
+(Accuracy + Error Analysis)
 
-↓
+```
 
+---
 
+## Results Summary
 
-Reasoning-DPO Investigation
+| Stage | Objective | Observation |
 
+|---|---|---|
 
+| Base Model | General language modeling | Original model capability |
 
+| SFT | Instruction supervision | Improves instruction following and response structure |
 
+| DPO | Preference optimization | Improves response alignment and consistency |
 
-Project Structure
+| Reasoning-DPO | Reasoning preference optimization | Small improvement on mathematical reasoning |
 
+---
 
+## Project Structure
+
+```
 
 mini-dpo-lab
-
-
 
 ├── data
 
@@ -102,8 +104,6 @@ mini-dpo-lab
 
 │   ├── train_[sft.py](http://sft.py)
 
-│   ├── merge_[sft.py](http://sft.py)
-
 │   ├── train_[dpo.py](http://dpo.py)
 
 │   └── train_reasoning_[dpo.py](http://dpo.py)
@@ -114,13 +114,13 @@ mini-dpo-lab
 
 │   ├── compare_[sft.py](http://sft.py)
 
-│   ├── compare_[dpo.py](http://dpo.py)
-
 │   ├── compare_[gsm8k.py](http://gsm8k.py)
 
 │   ├── calculate_gsm8k_[accuracy.py](http://accuracy.py)
 
-│   └── analyze_reasoning_[gain.py](http://gain.py)
+│   ├── analyze_reasoning_[gain.py](http://gain.py)
+
+│   └── error_[analysis.md](http://analysis.md)
 
 │
 
@@ -134,33 +134,27 @@ mini-dpo-lab
 
 ├── docs
 
-│   └── experiment_[analysis.md](http://analysis.md)
+│   ├── EXP003_DPO_[result.md](http://result.md)
+
+│   ├── EXP004_reasoning_dataset_[analysis.md](http://analysis.md)
+
+│   └── pipeline.png
 
 │
 
 └── [README.md](http://README.md)
 
+```
 
+---
 
+# Model
 
-
-Models
-
-
-
-Base Model:
-
-
+## Base Model
 
 Qwen/Qwen2.5-1.5B-Instruct
 
-
-
-
-
-Training Strategy:
-
-
+## Training Strategy
 
 - Freeze original model parameters
 
@@ -168,175 +162,23 @@ Training Strategy:
 
 - Reduce GPU memory requirements
 
-- Keep the original model unchanged
-
-
-
-
-
-Hardware:
-
-
+## Hardware
 
 RTX 5070 Laptop GPU (16GB VRAM)
 
+---
 
+# Experiments
 
+## EXP001: Toy SFT Pipeline
 
+### Objective
 
-Installation
+Validate the complete supervised fine-tuning workflow.
 
-
-
-Create conda environment:
-
-
-
-conda create -n mini-dpo python=3.11
-
-
-
-conda activate mini-dpo
-
-
-
-
-
-Install dependencies:
-
-
-
-pip install -r requirements.txt
-
-
-
-
-
-Quick Start
-
-
-
-1. Supervised Fine-Tuning (SFT)
-
-
-
-Prepare SFT dataset:
-
-
-
-python data/prepare_sft_[data.py](http://data.py)
-
-
-
-Train SFT model:
-
-
-
-python training/train_[sft.py](http://sft.py)
-
-
-
-
-
-2. Direct Preference Optimization (DPO)
-
-
-
-Prepare preference dataset:
-
-
-
-python data/prepare_dpo_[data.py](http://data.py)
-
-
-
-Train DPO model:
-
-
-
-python training/train_[dpo.py](http://dpo.py)
-
-
-
-
-
-3. Reasoning-DPO
-
-
-
-Generate reasoning preference pairs:
-
-
-
-python data/generate_reasoning_[dpo.py](http://dpo.py)
-
-
-
-Validate preference pairs:
-
-
-
-python data/validate_reasoning_[pairs.py](http://pairs.py)
-
-
-
-Train Reasoning-DPO:
-
-
-
-python training/train_reasoning_[dpo.py](http://dpo.py)
-
-
-
-
-
-4. Evaluation
-
-
-
-Run GSM8K evaluation:
-
-
-
-python evaluation/compare_[gsm8k.py](http://gsm8k.py)
-
-
-
-Calculate accuracy:
-
-
-
-python evaluation/calculate_gsm8k_[accuracy.py](http://accuracy.py)
-
-
-
-
-
-Experiments
-
-
-
-
-
-EXP001: Toy SFT Pipeline
-
-
-
-Objective:
-
-
-
-Validate the supervised fine-tuning workflow.
-
-
-
-Implemented:
-
-
+### Implemented
 
 - Dataset formatting
-
-- Chat template preparation
 
 - LoRA training
 
@@ -344,31 +186,23 @@ Implemented:
 
 - Basic inference testing
 
+---
 
+## EXP002: Alpaca-style SFT
 
-
-
-EXP002: Alpaca-style SFT
-
-
-
-Objective:
-
-
+### Objective
 
 Improve instruction-following ability through supervised fine-tuning.
 
+### Training
 
+- Supervised Fine-Tuning
 
+- LoRA parameter-efficient training
 
+### Observation
 
-Observation:
-
-
-
-SFT mainly improves:
-
-
+SFT improves:
 
 - Instruction following
 
@@ -376,93 +210,55 @@ SFT mainly improves:
 
 - Task-oriented generation
 
+### Limitation
 
+- Limited improvement in reasoning ability
 
+---
 
+# EXP003: Direct Preference Optimization (DPO)
 
-Limitations:
-
-
-
-- No significant factual knowledge improvement
-
-- Limited reasoning improvement
-
-
-
-
-
-EXP003: Direct Preference Optimization (DPO)
-
-
-
-Objective:
-
-
+## Objective
 
 Apply preference optimization on top of the SFT model.
 
-
-
-
-
-Dataset:
-
-
+## Dataset
 
 UltraFeedback preference dataset
 
+## Training Format
 
+```json
 
+{
 
+  "prompt": "...",
 
-Training format:
+  "chosen": "...",
 
+  "rejected": "..."
 
+}
 
-prompt, chosen, rejected
+```
 
+## Configuration
 
+- Epochs: 1
 
+- Batch size: 1
 
+- Gradient accumulation steps: 4
 
-Configuration:
+- Learning rate: 5e-5
 
+- Beta: 0.1
 
+- Max sequence length: 512
 
-Epochs: 1
-
-
-
-Batch size: 1
-
-
-
-Gradient accumulation: 4
-
-
-
-Learning rate: 5e-5
-
-
-
-Beta: 0.1
-
-
-
-Max sequence length: 512
-
-
-
-
-
-Evaluation:
-
-
+## Evaluation
 
 Compared models:
-
-
 
 - Base Qwen model
 
@@ -470,259 +266,115 @@ Compared models:
 
 - DPO model
 
+## Findings
 
-
-
-
-Categories:
-
-
-
-- Instruction following
-
-- Format control
-
-- Role playing
-
-- Reasoning
-
-- Coding
-
-
-
-
-
-Main findings:
-
-
-
-- SFT improves instruction following and response structure.
+- SFT improves instruction following and response formatting.
 
 - DPO improves preference alignment and response consistency.
 
-- SFT and DPO alone do not automatically improve mathematical reasoning ability.
+- Alignment optimization does not automatically improve reasoning ability.
 
+---
 
+# EXP004: Reasoning-DPO
 
+## Objective
 
+Investigate whether reasoning-aware preference optimization can improve mathematical reasoning ability.
 
-EXP004: Reasoning-DPO
-
-
-
-
-
-Overview:
-
-
-
-EXP004 investigates whether preference optimization on reasoning trajectories can improve mathematical reasoning ability.
-
-
-
-
-
-Different from standard DPO, this experiment introduces reasoning-aware preference pairs:
-
-
+Different from standard DPO, this experiment uses reasoning preference pairs:
 
 - chosen: correct reasoning trajectory
 
 - rejected: plausible but incorrect reasoning trajectory
 
+## Dataset
 
+- GSM8K
 
+- 500 generated reasoning preference pairs
 
+- 404 validated samples
 
-Dataset:
+## Pipeline
 
-
-
-GSM8K
-
-
-
-
-
-Pipeline:
-
-
+```
 
 GSM8K
 
+↓
 
+Reasoning generation
 
 ↓
 
-
-
-Generate reasoning preference pairs
-
-
+Negative reasoning construction
 
 ↓
 
-
-
-Validate dataset
-
-
+Validation
 
 ↓
 
+Reasoning-DPO Training
 
+```
 
-DPO training
-
-
-
-
-
-Statistics:
-
-
-
-Generated pairs: 500
-
-
-
-Validated pairs: 404
-
-
-
-
-
-Training:
-
-
-
-Base Model:
-
-
-
-Qwen2.5-1.5B-Instruct
-
-
-
-
-
-Method:
-
-
-
-- LoRA
-
-- DPO
-
-
-
-
-
-Evaluation:
-
-
+## Evaluation
 
 Benchmark:
 
+- GSM8K test set
 
+- 100 samples
 
-GSM8K test set
+## Results
 
+| Model | Accuracy |
 
+|---|---:|
 
+| Base | 29% |
 
+| SFT | 32% |
 
-Evaluation samples:
+| DPO | 32% |
 
+| Reasoning-DPO | 33% |
 
+## Analysis
 
-100 problems
+Reasoning-DPO achieves a small improvement over standard DPO.
 
+Error analysis shows:
 
-
-
-
-Results:
-
-
-
-Base: 29%
-
-
-
-SFT: 32%
-
-
-
-DPO: 32%
-
-
-
-Reasoning-DPO: 33%
-
-
-
-
-
-Analysis:
-
-
-
-Reasoning-DPO achieves a small improvement compared with standard DPO.
-
-
-
-
-
-Improvements:
-
-
+### Improvements
 
 - More complete reasoning trajectories
 
-- Clearer intermediate calculations
+- Better step-by-step problem solving
 
-- Reduced incorrect reasoning patterns
+### Failure Cases
 
+- Irrelevant continuation
 
+- Hallucinated instructions
 
+- Noise from synthetic preference data
 
+## Future Improvements
 
-Limitations:
+- Higher quality reasoning preference data
 
+- Better negative reasoning generation
 
+- Larger evaluation benchmark
 
-- Generated preference data contains noise
+- Comparison with GRPO and RL-based reasoning optimization
 
-- Negative reasoning generation quality affects performance
+---
 
-- Small-scale evaluation limits conclusions
-
-
-
-
-
-Future Work:
-
-
-
-- Higher quality reasoning preference datasets
-
-- Better negative reasoning generation strategies
-
-- Larger-scale evaluation
-
-- Compare with GRPO and RL-based reasoning optimization
-
-- Explore reasoning verification methods
-
-
-
-
-
-References:
-
-
+# References
 
 - InstructGPT: Training language models to follow instructions with human feedback
 
@@ -733,7 +385,4 @@ References:
 - UltraFeedback Dataset
 
 - GSM8K Dataset
-
-  
-
 
