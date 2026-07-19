@@ -69,3 +69,16 @@ Thumbs.db
 
 .vscode/
 .idea/
+
+# =====================
+# Intermediate data
+# =====================
+
+data/intermediate/
+
+
+# =====================
+# Evaluation outputs
+# =====================
+
+evaluation/outputs/
