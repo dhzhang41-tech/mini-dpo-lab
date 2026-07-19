@@ -1,0 +1,31 @@
+# Mini-DPO-Lab Pipeline
+
+
+```mermaid
+flowchart TD
+
+A[Qwen2.5-1.5B-Instruct<br/>Base Model]
+
+B[Supervised Fine-Tuning<br/>LoRA]
+
+C[Instruction Following Model]
+
+D[Direct Preference Optimization<br/>DPO]
+
+E[Reasoning Preference Dataset<br/>GSM8K]
+
+F[Reasoning-DPO]
+
+G[GSM8K Evaluation]
+
+H[Error Analysis]
+
+
+A --> B
+B --> C
+C --> D
+E --> F
+D --> F
+F --> G
+G --> H
+```
